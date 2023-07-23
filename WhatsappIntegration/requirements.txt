@@ -1,0 +1,8 @@
+flask==1.1.2
+twilio==6.50.1
+openai==0.27.0
+requests==2.25.1
+google-auth==1.32.1
+google-auth-oauthlib==0.4.4
+google-auth-httplib2==0.1.0
+google-api-python-client==2.8.0
