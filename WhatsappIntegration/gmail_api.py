@@ -46,3 +46,24 @@ class GmailAPI:
             elif "Contact Phone:" in line:
                 booking_data["Contact Phone"] = line.split(":")[1].strip()
         return booking_data
+    
+    def watch(self, topic_name):
+        request = {
+            'labelIds': ['INBOX'],
+            'topicName': topic_name
+        }
+        self.service.users().watch(userId='me', body=request).execute()
+
+    def get_email(self, email_id):
+        email = self.service.users().messages().get(userId='me', id=email_id).execute()
+        subject = ''
+        body = ''
+        for header in email['payload']['headers']:
+            if header['name'] == 'Subject':
+                subject = header['value']
+        if 'parts' in email['payload']['mimeType']:
+            body = email['payload']['parts'][0]['body']['data']
+        else:
+            body = email['payload']['body']['data']
+        return {'subject': subject, 'body': body}
+    
