@@ -1,6 +1,7 @@
 from flask import Flask, request
 from gmail_api import GmailAPI
 from whatsapp_bot import WhatsAppBot
+from twilio.twiml.messaging_response import MessagingResponse
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'top-secret!'
@@ -33,6 +34,25 @@ def notifications():
             )
 
     return '', 204
+
+@app.route('/bot', methods=['POST'])
+def bot():
+    incoming_msg = request.values.get('Body', '')
+    phone_number = request.values.get('WaId', '')
+
+    if incoming_msg:
+        # Get the chat log for this user, or start a new one
+        chat_log = whatsapp_bot.chat_logs.get(phone_number, whatsapp_bot.start_chat_log)
+        answer = whatsapp_bot.ask(incoming_msg, chat_log)
+        whatsapp_bot.chat_logs[phone_number] = whatsapp_bot.append_interaction_to_chat_log(incoming_msg, answer, chat_log)
+        whatsapp_bot.send_whatsapp_message(answer, phone_number)
+        print(answer)
+    else:
+        whatsapp_bot.send_whatsapp_message("Message Cannot Be Empty!")
+        print("Message Is Empty")
+    r = MessagingResponse()
+    r.message("")        
+    return str(r)
 
 if __name__ == '__main__':
     # Authenticate with the Gmail API
